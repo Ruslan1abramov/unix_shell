@@ -15,9 +15,7 @@
 /* adduser.c
 Add Users, Set Up Profiles,
 Set The Password And Email
-An Admin
-2008 - Mike Golvach - eggi@comcast.net
-Creative Commons Attribution-Noncommercial-Share Alike 3.0 United States License
+
 */
 
 int main(int argc, char **argv)
@@ -25,16 +23,15 @@ int main(int argc, char **argv)
 
     struct passwd *userlist;
     int count, usernumber;
-    FILE *tmp, *stmp, *mailer, *profile;
+    FILE *tmp, *stmp, *profile;
     char *commentfield, *username, *userdir, *home;
-    char *mailcomment, *mailemail, reply;
+    char reply;
 
     commentfield = (char *)malloc(1024*sizeof(char));
     username = (char *)malloc(8*sizeof(char));
     userdir = (char *)malloc(256*sizeof(char));
     home = (char *)malloc(256*sizeof(char));
-    mailcomment = (char *)malloc(1024*sizeof(char));
-    mailemail = (char *)malloc(512*sizeof(char));
+
 
     if (argc != 4) {
         printf("Usage: %s [dirname - no slashes ] [ logname ] [ comment - in quotes ]\n", argv[0]);
