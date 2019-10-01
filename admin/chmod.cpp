@@ -33,6 +33,6 @@ int main(int argc, char **argv)
     }
 
     str.insert(0, "0");
-    chown(argv[2], str);
+    chmod(argv[2], str);
 
 }
