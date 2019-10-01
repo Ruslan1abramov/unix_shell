@@ -32,7 +32,6 @@ int main(int argc, char **argv)
     userdir = (char *)malloc(256*sizeof(char));
     home = (char *)malloc(256*sizeof(char));
 
-
     if (argc != 4) {
         printf("Usage: %s [dirname - no slashes ] [ logname ] [ comment - in quotes ]\n", argv[0]);
         exit(1);
