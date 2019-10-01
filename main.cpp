@@ -1,4 +1,5 @@
-// C Program to design a shell in Linux 
+// C Program to design a shell in Linux
+//https://www.geeksforgeeks.org/making-linux-shell-c/
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
