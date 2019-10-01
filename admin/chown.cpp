@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
-void my_chown (const char *file_path,
+void do_chown (const char *file_path,
                const char *user_name,
                const char *group_name)
 {
