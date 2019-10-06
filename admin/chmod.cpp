@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     }
     str = argv[1];
     for(char& c : str) {
-        if (7 - c < 0 || 7 - c > 7){
+        if ('7' - c < 0 || '7' - c > 7){
             printf("Please set a value between 0 to 7\n");
             exit(1);
         }
