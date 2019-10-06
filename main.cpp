@@ -158,7 +158,19 @@ int ownCmdHandler(char** parsed)
     ListOfOwnCmds[0] = "exit";
     ListOfOwnCmds[1] = "cd";
     ListOfOwnCmds[2] = "help";
-    ListOfOwnCmds[3] = "hello";
+    //simpale 
+    ListOfOwnCmds[4] = "ws";
+    ListOfOwnCmds[5] = "cat";
+    ListOfOwnCmds[6] = "ls";
+    ListOfOwnCmds[7] = "mv";
+    //admin
+    ListOfOwnCmds[8] = "chmod";
+    ListOfOwnCmds[9] = "chown";
+    ListOfOwnCmds[10] = "adduser";
+    //sys
+    ListOfOwnCmds[11] = "ifconig";
+    ListOfOwnCmds[12] = "ping";
+    ListOfOwnCmds[13] = "kill";
 
     for (i = 0; i < NoOfOwnCmds; i++) {
         if (strcmp(parsed[0], ListOfOwnCmds[i]) == 0) {
