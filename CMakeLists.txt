@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(unix_shell)
 
 set(CMAKE_CXX_STANDARD 14)
-
+include_directories(/usr/include/readline)
 add_executable(unix_shell
         main.cpp
         sys/kill.cpp
@@ -16,3 +16,4 @@ add_executable(unix_shell
 #        sys/ifconfig.h
         sys/kill.h
         )
+target_link_libraries(unix_shell readline)

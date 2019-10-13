@@ -7,7 +7,7 @@
 #include<sys/types.h>
 #include<sys/wait.h>
 #include<readline/readline.h>
-//#include<readline/history.h>
+#include<readline/history.h>
 
 #include "./simple/Simple.h"
 #include "./admin/Admin.h"
@@ -45,9 +45,9 @@ int takeInput(char* str)
 {
     char* buf;
 
-    buf = "";//readline("\n>>> ");
+    buf = readline("\n>>> ");
     if (strlen(buf) != 0) {
-        //add_history(buf);
+        add_history(buf);
         strcpy(str, buf);
         return 0;
     } else {
