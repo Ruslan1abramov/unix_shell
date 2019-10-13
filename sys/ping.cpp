@@ -245,7 +245,7 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
 }
 
 // Driver Code
-int main(int argc, char *argv[])
+int ping(int argc, char *argv[])
 {
     int sockfd;
     char *ip_addr, *reverse_hostname;

@@ -9,6 +9,14 @@
 #include<readline/readline.h>
 #include<readline/history.h>
 
+#include "./simple/Simple.h"
+#include "./admin/Admin.h"
+#include "./sys/ping.h"
+#include "./sys/ifconfig.h"
+#include "./sys/kill.h"
+
+
+
 #define MAXCOM 1000 // max number of letters to be supported 
 #define MAXLIST 100 // max number of commands to be supported 
 
@@ -55,82 +63,6 @@ void printDir()
     printf("\nDir: %s", cwd);
 }
 
-// Function where the system command is executed 
-void execArgs(char** parsed)
-{
-    // Forking a child 
-    pid_t pid = fork();
-
-    if (pid == -1) {
-        printf("\nFailed forking child..");
-        return;
-    } else if (pid == 0) {
-        if (execvp(parsed[0], parsed) < 0) {
-            printf("\nCould not execute command..");
-        }
-        exit(0);
-    } else {
-        // waiting for child to terminate 
-        wait(NULL);
-        return;
-    }
-}
-
-// Function where the piped system commands is executed 
-void execArgsPiped(char** parsed, char** parsedpipe)
-{
-    // 0 is read end, 1 is write end 
-    int pipefd[2];
-    pid_t p1, p2;
-
-    if (pipe(pipefd) < 0) {
-        printf("\nPipe could not be initialized");
-        return;
-    }
-    p1 = fork();
-    if (p1 < 0) {
-        printf("\nCould not fork");
-        return;
-    }
-
-    if (p1 == 0) {
-        // Child 1 executing.. 
-        // It only needs to write at the write end 
-        close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[1]);
-
-        if (execvp(parsed[0], parsed) < 0) {
-            printf("\nCould not execute command 1..");
-            exit(0);
-        }
-    } else {
-        // Parent executing 
-        p2 = fork();
-
-        if (p2 < 0) {
-            printf("\nCould not fork");
-            return;
-        }
-
-        // Child 2 executing.. 
-        // It only needs to read at the read end 
-        if (p2 == 0) {
-            close(pipefd[1]);
-            dup2(pipefd[0], STDIN_FILENO);
-            close(pipefd[0]);
-            if (execvp(parsedpipe[0], parsedpipe) < 0) {
-                printf("\nCould not execute command 2..");
-                exit(0);
-            }
-        } else {
-            // parent executing, waiting for two children 
-            wait(NULL);
-            wait(NULL);
-        }
-    }
-}
-
 // Help command builtin 
 void openHelp()
 {
@@ -149,16 +81,29 @@ void openHelp()
 }
 
 // Function to execute builtin commands 
-int ownCmdHandler(char** parsed)
+int ownCmdHandler(char** parsed, int numOfArgs)
 {
-    int NoOfOwnCmds = 4, i, switchOwnArg = 0;
+    int NoOfOwnCmds = 15, i, switchOwnArg = 0;
     char* ListOfOwnCmds[NoOfOwnCmds];
     char* username;
 
     ListOfOwnCmds[0] = "exit";
     ListOfOwnCmds[1] = "cd";
     ListOfOwnCmds[2] = "help";
-    ListOfOwnCmds[3] = "hello";
+    //simple
+    ListOfOwnCmds[4] = "wc";
+    ListOfOwnCmds[5] = "cat";
+    ListOfOwnCmds[6] = "ls";
+    ListOfOwnCmds[7] = "mv";
+    ListOfOwnCmds[8] = "tail";
+    //admin
+    ListOfOwnCmds[9] = "chmod";
+    ListOfOwnCmds[10] = "chown";
+    ListOfOwnCmds[11] = "adduser";
+    //sys
+    ListOfOwnCmds[12] = "ifconig";
+    ListOfOwnCmds[13] = "ping";
+    ListOfOwnCmds[14] = "kill";
 
     for (i = 0; i < NoOfOwnCmds; i++) {
         if (strcmp(parsed[0], ListOfOwnCmds[i]) == 0) {
@@ -184,6 +129,42 @@ int ownCmdHandler(char** parsed)
                    "\nUse help to know more..\n",
                    username);
             return 1;
+        case 5:
+            wc(numOfArgs ,parsed);
+            return 1;
+        case 6:
+            cat(numOfArgs ,parsed);
+            return 1;
+        case 7:
+            ls();
+            return 1;
+        case 8:
+            mv(numOfArgs ,parsed);
+            return 1;
+        case 9:
+            tail(numOfArgs ,parsed);
+            return 1;
+        case 10:
+            chmod(numOfArgs ,parsed);
+            return 1;
+        case 11:
+            myChown(numOfArgs ,parsed);
+            return 1;
+        case 12:
+            adduser(numOfArgs ,parsed);
+            return 1;
+        case 13:
+            ifconfig(numOfArgs ,parsed);
+            return 1;
+        case 14:
+            ping(numOfArgs ,parsed);
+            return 1;
+        case 15:
+            myKill(numOfArgs ,parsed);
+            return 1;
+
+
+
         default:
             break;
     }
@@ -191,25 +172,9 @@ int ownCmdHandler(char** parsed)
     return 0;
 }
 
-// function for finding pipe 
-int parsePipe(char* str, char** strpiped)
-{
-    int i;
-    for (i = 0; i < 2; i++) {
-        strpiped[i] = strsep(&str, "|");
-        if (strpiped[i] == NULL)
-            break;
-    }
-
-    if (strpiped[1] == NULL)
-        return 0; // returns zero if no pipe is found. 
-    else {
-        return 1;
-    }
-}
 
 // function for parsing command words 
-void parseSpace(char* str, char** parsed)
+void parseSpace(char* str, char** parsed, int* numOfArgs)
 {
     int i;
 
@@ -221,58 +186,36 @@ void parseSpace(char* str, char** parsed)
         if (strlen(parsed[i]) == 0)
             i--;
     }
+
+    *numOfArgs = i;
 }
 
-int processString(char* str, char** parsed, char** parsedpipe)
+int processString(char* str, char** parsed)
 {
+    int numOfArgs = 0;
+    parseSpace(str, parsed, &numOfArgs);
 
-    char* strpiped[2];
-    int piped = 0;
-
-    piped = parsePipe(str, strpiped);
-
-    if (piped) {
-        parseSpace(strpiped[0], parsed);
-        parseSpace(strpiped[1], parsedpipe);
-
-    } else {
-
-        parseSpace(str, parsed);
-    }
-
-    if (ownCmdHandler(parsed))
+    if (ownCmdHandler(parsed, numOfArgs))
         return 0;
     else
-        return 1 + piped;
+        return 1 ;
 }
 
 int main()
 {
     char inputString[MAXCOM], *parsedArgs[MAXLIST];
-    char* parsedArgsPiped[MAXLIST];
-    int execFlag = 0;
     init_shell();
 
     while (1) {
         // print shell line 
         printDir();
-        // take input 
+        // take input
         if (takeInput(inputString))
             continue;
         // process 
-        execFlag = processString(inputString,
-                                 parsedArgs, parsedArgsPiped);
-        // execflag returns zero if there is no command 
-        // or it is a builtin command, 
-        // 1 if it is a simple command 
-        // 2 if it is including a pipe. 
-
-        // execute 
-        if (execFlag == 1)
-            execArgs(parsedArgs);
-
-        if (execFlag == 2)
-            execArgsPiped(parsedArgs, parsedArgsPiped);
+        processString(inputString,parsedArgs);
     }
+
+
     return 0;
 } 

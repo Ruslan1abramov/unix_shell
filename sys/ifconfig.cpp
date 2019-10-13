@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <linux/if_link.h>
 
-int main(int argc, char *argv[])
+int ifconfig(int argc, char *argv[])
 {
     struct ifaddrs *ifaddr, *ifa;
     int family, s, n;

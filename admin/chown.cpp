@@ -1,8 +1,14 @@
 //
 // Created by rusla on 10/1/2019.
-//
+// https://stackoverflow.com/questions/8778834/change-owner-and-group-in-c
 #include <sys/types.h>
 #include <pwd.h>
+
+void myChown(int argc, char **argv)
+{
+
+}
+
 
 void do_chown (const char *file_path,
                const char *user_name,

@@ -5,7 +5,7 @@
 #include<sys/types.h>
 #include<signal.h>
 
-int main(int argc, char **argv)
+int myKill(int argc, char **argv)
 {
 
     if (argc != 2) {
