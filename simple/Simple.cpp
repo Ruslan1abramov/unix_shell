@@ -76,7 +76,7 @@ int ls()
         die("Error getting pathname\n");
 
     printf("Current Working Directory = %s\n",pathname);
-    count = scandir(pathname, &files, file_select, alphasort);
+    count = scandir(pathname, &files, reinterpret_cast<int (*)(const dirent *)>(file_select), alphasort);
 
     /* If no files found, make a non-selectable menu item */
     if(count <= 0)

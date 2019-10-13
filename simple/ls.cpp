@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #define FALSE 0
-#define TRUE !FALSE
+#define TRUE 1
 
 extern  int alphasort(); //Inbuilt sorting function
 

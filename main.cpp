@@ -7,7 +7,7 @@
 #include<sys/types.h>
 #include<sys/wait.h>
 #include<readline/readline.h>
-#include<readline/history.h>
+//#include<readline/history.h>
 
 #include "./simple/Simple.h"
 #include "./admin/Admin.h"
@@ -45,9 +45,9 @@ int takeInput(char* str)
 {
     char* buf;
 
-    buf = readline("\n>>> ");
+    buf = "";//readline("\n>>> ");
     if (strlen(buf) != 0) {
-        add_history(buf);
+        //add_history(buf);
         strcpy(str, buf);
         return 0;
     } else {
@@ -145,19 +145,19 @@ int ownCmdHandler(char** parsed, int numOfArgs)
             tail(numOfArgs ,parsed);
             return 1;
         case 10:
-            chmod(numOfArgs ,parsed);
+            myChmod(numOfArgs ,parsed);
             return 1;
         case 11:
-            myChown(numOfArgs ,parsed);
+            //myChown(numOfArgs ,parsed);
             return 1;
         case 12:
             adduser(numOfArgs ,parsed);
             return 1;
         case 13:
-            ifconfig(numOfArgs ,parsed);
+            //ifconfig(numOfArgs ,parsed);
             return 1;
         case 14:
-            ping(numOfArgs ,parsed);
+            //ping(numOfArgs ,parsed);
             return 1;
         case 15:
             myKill(numOfArgs ,parsed);

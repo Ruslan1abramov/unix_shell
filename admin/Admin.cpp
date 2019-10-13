@@ -11,6 +11,10 @@
 #include <sys/param.h>
 #include <string>
 #include <pwd.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <grp.h>
+
 using namespace std;
 
 
@@ -121,7 +125,7 @@ int adduser(int argc, char **argv)
 
 }
 
-int chmod(int argc, char **argv)
+int myChmod(int argc, char **argv)
 {
     string str;
 
@@ -143,7 +147,8 @@ int chmod(int argc, char **argv)
     }
 
     str.insert(0, "0");
-    chmod(argv[2], str);
+    chmod(argv[2], stoi(str));
+
 
 }
 
@@ -158,17 +163,22 @@ void do_chown (const char *file_path,
 
     pwd = getpwnam(user_name);
     if (pwd == NULL) {
-        die("Failed to get uid");
+        printf("Failed to get uid");
+        return;
     }
     uid = pwd->pw_uid;
 
     grp = getgrnam(group_name);
     if (grp == NULL) {
-        die("Failed to get gid");
+        printf("Failed to get gid");
+        return;
+
     }
     gid = grp->gr_gid;
 
     if (chown(file_path, uid, gid) == -1) {
-        die("chown fail");
+        printf("chown fail");
+        return;
+
     }
 }

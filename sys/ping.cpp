@@ -29,7 +29,7 @@
 #define PORT_NO 0
 
 // Automatic port number
-#define PING_SLEEP_RATE 1000000 x
+#define PING_SLEEP_RATE 1000000
 
 // Gives the timeout delay for receiving packets
 // in seconds
@@ -48,7 +48,8 @@ struct ping_pkt
 
 // Calculating the Check Sum
 unsigned short checksum(void *b, int len)
-{    unsigned short *buf = b;
+{
+    unsigned short *buf = ((unsigned short*)(&b));//b;
     unsigned int sum=0;
     unsigned short result;
 
@@ -140,8 +141,7 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
     if (setsockopt(ping_sockfd, SOL_IP, IP_TTL,
                    &ttl_val, sizeof(ttl_val)) != 0)
     {
-        printf("\nSetting socket options
-        to TTL failed!\n");
+        printf("\nSetting socket options to TTL failed!\n");
         return;
     }
 
@@ -211,15 +211,12 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
             {
                 if(!(pckt.hdr.type ==69 && pckt.hdr.code==0))
                 {
-                    printf("Error..Packet received with ICMP
-                    type %d code %d\n",
+                    printf("Error..Packet received with ICMP type %d code %d\n",
                     pckt.hdr.type, pckt.hdr.code);
                 }
                 else
                 {
-                    printf("%d bytes from %s (h: %s)
-                                   (%s) msg_seq=%d ttl=%d
-                    rtt = %Lf ms.\n",
+                    printf("%d bytes from %s (h: %s) (%s) msg_seq=%d ttl=%d rtt = %Lf ms.\n",
                     PING_PKT_S, ping_dom, rev_host,
                             ping_ip, msg_count,
                             ttl_val, rtt_msec);
@@ -237,8 +234,7 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
                  timeElapsed
 
     printf("\n===%s ping statistics===\n", ping_ip);
-    printf("\n%d packets sent, %d packets received, %f percent
-    packet loss. Total time: %Lf ms.\n\n",
+    printf("\n%d packets sent, %d packets received, %f percent packet loss. Total time: %Lf ms.\n\n",
     msg_count, msg_received_count,
             ((msg_count - msg_received_count)/msg_count) * 100.0,
             total_msec);
@@ -262,8 +258,7 @@ int ping(int argc, char *argv[])
     ip_addr = dns_lookup(argv[1], &addr_con);
     if(ip_addr==NULL)
     {
-        printf("\nDNS lookup failed! Could
-        not resolve hostname!\n");
+        printf("\nDNS lookup failed! Could not resolve hostname!\n");
         return 0;
     }
 

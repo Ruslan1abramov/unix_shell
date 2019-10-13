@@ -8,5 +8,5 @@
 #endif //UNIX_SHELL_ADMIN_H
 
 int adduser(int argc, char **argv);
-int chmod(int argc, char **argv);
+int myChmod(int argc, char **argv);
 void myChown(int argc, char **argv);
