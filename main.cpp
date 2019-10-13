@@ -9,6 +9,14 @@
 #include<readline/readline.h>
 #include<readline/history.h>
 
+#include "./simple/Simple.h"
+#include "./admin/Admin.h"
+#include "./sys/ping.h"
+#include "./sys/ifconfig.h"
+#include "./sys/kill.h"
+
+
+
 #define MAXCOM 1000 // max number of letters to be supported 
 #define MAXLIST 100 // max number of commands to be supported 
 
@@ -73,9 +81,9 @@ void openHelp()
 }
 
 // Function to execute builtin commands 
-int ownCmdHandler(char** parsed)
+int ownCmdHandler(char** parsed, int numOfArgs)
 {
-    int NoOfOwnCmds = 14, i, switchOwnArg = 0;
+    int NoOfOwnCmds = 15, i, switchOwnArg = 0;
     char* ListOfOwnCmds[NoOfOwnCmds];
     char* username;
 
@@ -83,18 +91,19 @@ int ownCmdHandler(char** parsed)
     ListOfOwnCmds[1] = "cd";
     ListOfOwnCmds[2] = "help";
     //simple
-    ListOfOwnCmds[4] = "ws";
+    ListOfOwnCmds[4] = "wc";
     ListOfOwnCmds[5] = "cat";
     ListOfOwnCmds[6] = "ls";
     ListOfOwnCmds[7] = "mv";
+    ListOfOwnCmds[8] = "tail";
     //admin
-    ListOfOwnCmds[8] = "chmod";
-    ListOfOwnCmds[9] = "chown";
-    ListOfOwnCmds[10] = "adduser";
+    ListOfOwnCmds[9] = "chmod";
+    ListOfOwnCmds[10] = "chown";
+    ListOfOwnCmds[11] = "adduser";
     //sys
-    ListOfOwnCmds[11] = "ifconig";
-    ListOfOwnCmds[12] = "ping";
-    ListOfOwnCmds[13] = "kill";
+    ListOfOwnCmds[12] = "ifconig";
+    ListOfOwnCmds[13] = "ping";
+    ListOfOwnCmds[14] = "kill";
 
     for (i = 0; i < NoOfOwnCmds; i++) {
         if (strcmp(parsed[0], ListOfOwnCmds[i]) == 0) {
@@ -120,6 +129,42 @@ int ownCmdHandler(char** parsed)
                    "\nUse help to know more..\n",
                    username);
             return 1;
+        case 5:
+            wc(numOfArgs ,parsed);
+            return 1;
+        case 6:
+            cat(numOfArgs ,parsed);
+            return 1;
+        case 7:
+            ls();
+            return 1;
+        case 8:
+            mv(numOfArgs ,parsed);
+            return 1;
+        case 9:
+            tail(numOfArgs ,parsed);
+            return 1;
+        case 10:
+            chmod(numOfArgs ,parsed);
+            return 1;
+        case 11:
+            myChown(numOfArgs ,parsed);
+            return 1;
+        case 12:
+            adduser(numOfArgs ,parsed);
+            return 1;
+        case 13:
+            ifconfig(numOfArgs ,parsed);
+            return 1;
+        case 14:
+            ping(numOfArgs ,parsed);
+            return 1;
+        case 15:
+            myKill(numOfArgs ,parsed);
+            return 1;
+
+
+
         default:
             break;
     }
@@ -129,7 +174,7 @@ int ownCmdHandler(char** parsed)
 
 
 // function for parsing command words 
-void parseSpace(char* str, char** parsed)
+void parseSpace(char* str, char** parsed, int* numOfArgs)
 {
     int i;
 
@@ -141,13 +186,16 @@ void parseSpace(char* str, char** parsed)
         if (strlen(parsed[i]) == 0)
             i--;
     }
+
+    *numOfArgs = i;
 }
 
 int processString(char* str, char** parsed)
 {
-    parseSpace(str, parsed);
+    int numOfArgs = 0;
+    parseSpace(str, parsed, &numOfArgs);
 
-    if (ownCmdHandler(parsed))
+    if (ownCmdHandler(parsed, numOfArgs))
         return 0;
     else
         return 1 ;

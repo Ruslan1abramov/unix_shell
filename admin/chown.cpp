@@ -4,6 +4,12 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+void myChown(int argc, char **argv)
+{
+
+}
+
+
 void do_chown (const char *file_path,
                const char *user_name,
                const char *group_name)
