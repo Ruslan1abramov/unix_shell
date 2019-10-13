@@ -156,7 +156,6 @@ int processString(char* str, char** parsed)
 int main()
 {
     char inputString[MAXCOM], *parsedArgs[MAXLIST];
-    char* parsedArgsPiped[MAXLIST];
     init_shell();
 
     while (1) {
