@@ -6,7 +6,7 @@
 
 void myChown(int argc, char **argv)
 {
-
+    do_chown(argv[0], argv[1], argv[2]);
 }
 
 

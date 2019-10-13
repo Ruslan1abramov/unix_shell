@@ -148,7 +148,7 @@ int ownCmdHandler(char** parsed, int numOfArgs)
             myChmod(numOfArgs ,parsed);
             return 1;
         case 11:
-            //myChown(numOfArgs ,parsed);
+            myChown(numOfArgs ,parsed);
             return 1;
         case 12:
             adduser(numOfArgs ,parsed);

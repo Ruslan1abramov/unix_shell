@@ -153,7 +153,8 @@ int myChmod(int argc, char **argv)
 
 }
 
-void do_chown (const char *file_path,
+
+void do_chown(const char *file_path,
                const char *user_name,
                const char *group_name)
 {
@@ -182,4 +183,10 @@ void do_chown (const char *file_path,
         return;
 
     }
+}
+
+
+void myChown(int argc, char **argv)
+{
+    do_chown(argv[0], argv[1], argv[2]);
 }
