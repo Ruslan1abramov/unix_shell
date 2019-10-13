@@ -274,14 +274,10 @@ int wc(int argc , char *argv[])
     if(argc == 0)
     {
         printf("Please specify the filename as argument\n");
-        exit(0);
+        return 1;
     }
 
-    if(fp != 0)
-    {
-        printf("No such file or directory\n");
-        exit(0);
-    }
+
     fp = fopen(argv[1],"r");
 
     while((ch=fgetc(fp))!=EOF)

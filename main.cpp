@@ -29,8 +29,8 @@ void init_shell()
     clear();
     printf("\n\n\n\n******************"
            "************************");
-    printf("\n\n\n\t****MY SHELL****");
-    printf("\n\n\t-USE AT YOUR OWN RISK-");
+    printf("\n\n\n\t****MY SHELL Project****");
+    printf("\n\n\t-Ruslan Abramov Ruslan1Abramov@gmail.com-");
     printf("\n\n\n\n*******************"
            "***********************");
     char* username = getenv("USER");
