@@ -21,7 +21,7 @@ int ifconfig(int argc, char *argv[])
 
     if (getifaddrs(&ifaddr) == -1) {
         perror("getifaddrs");
-        exit(EXIT_FAILURE);
+        return (EXIT_FAILURE);
     }
 
     /* Walk through linked list, maintaining head pointer so we
@@ -53,13 +53,13 @@ int ifconfig(int argc, char *argv[])
                             NULL, 0, NI_NUMERICHOST);
             if (s != 0) {
                 printf("getnameinfo() failed: %s\n", gai_strerror(s));
-                exit(EXIT_FAILURE);
+                return (EXIT_FAILURE);
             }
 
             printf("\t\taddress: <%s>\n", host);
 
         } else if (family == AF_PACKET && ifa->ifa_data != NULL) {
-            struct rtnl_link_stats *stats = ifa->ifa_data;
+            struct rtnl_link_stats *stats = static_cast<rtnl_link_stats *>(ifa->ifa_data);
 
             printf("\t\ttx_packets = %10u; rx_packets = %10u\n"
                    "\t\ttx_bytes   = %10u; rx_bytes   = %10u\n",
@@ -69,5 +69,5 @@ int ifconfig(int argc, char *argv[])
     }
 
     freeifaddrs(ifaddr);
-    exit(EXIT_SUCCESS);
+    return (EXIT_SUCCESS);
 }

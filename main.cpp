@@ -45,7 +45,7 @@ int takeInput(char* str)
 {
     char* buf;
 
-    buf = readline("\n>>> ");
+    buf = readline("$ ");
     if (strlen(buf) != 0) {
         add_history(buf);
         strcpy(str, buf);
@@ -60,7 +60,7 @@ void printDir()
 {
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    printf("\nDir: %s", cwd);
+    printf("%s", cwd);
 }
 
 // Help command builtin 
@@ -101,7 +101,7 @@ int ownCmdHandler(char** parsed, int numOfArgs)
     ListOfOwnCmds[10] = "chown";
     ListOfOwnCmds[11] = "adduser";
     //sys
-    ListOfOwnCmds[12] = "ifconig";
+    ListOfOwnCmds[12] = "ifconfig";
     ListOfOwnCmds[13] = "ping";
     ListOfOwnCmds[14] = "kill";
 
@@ -154,10 +154,10 @@ int ownCmdHandler(char** parsed, int numOfArgs)
             adduser(numOfArgs ,parsed);
             return 1;
         case 13:
-            //ifconfig(numOfArgs ,parsed);
+            ifconfig(numOfArgs ,parsed);
             return 1;
         case 14:
-            //ping(numOfArgs ,parsed);
+            ping(numOfArgs ,parsed);
             return 1;
         case 15:
             myKill(numOfArgs ,parsed);

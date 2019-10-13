@@ -6,14 +6,14 @@ include_directories(/usr/include/readline)
 add_executable(unix_shell
         main.cpp
         sys/kill.cpp
-#        sys/ping.cpp
-#        sys/ifconfig.cpp
+        sys/ping.cpp
+        sys/ifconfig.cpp
         simple/Simple.cpp
         simple/Simple.h
         admin/Admin.h
         admin/Admin.cpp
-#        sys/ping.h
-#        sys/ifconfig.h
+        sys/ping.h
+        sys/ifconfig.h
         sys/kill.h
         )
 target_link_libraries(unix_shell readline)

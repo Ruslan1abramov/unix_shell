@@ -189,8 +189,8 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
         //receive packet
         addr_len=sizeof(r_addr);
 
-        if ( recvfrom(ping_sockfd, &pckt, sizeof(pckt), 0,
-                      (struct sockaddr*)&r_addr, &addr_len) <= 0
+        if (recvfrom(ping_sockfd, &pckt, sizeof(pckt), 0,
+                     (struct sockaddr*)&r_addr, reinterpret_cast<socklen_t *>(&addr_len)) <= 0
              && msg_count>1)
         {
             printf("\nPacket receive failed!\n");
@@ -200,8 +200,7 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
         {
             clock_gettime(CLOCK_MONOTONIC, &time_end);
 
-            double timeElapsed = ((double)(time_end.tv_nsec -
-                                           time_start.tv_nsec))/1000000.0
+            double timeElapsed = ((double)(time_end.tv_nsec - time_start.tv_nsec))/1000000.0;
             rtt_msec = (time_end.tv_sec-
                         time_start.tv_sec) * 1000.0
                        + timeElapsed;
@@ -231,7 +230,7 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
                                    tfs.tv_nsec))/1000000.0;
 
     total_msec = (tfe.tv_sec-tfs.tv_sec)*1000.0+
-                 timeElapsed
+                 timeElapsed;
 
     printf("\n===%s ping statistics===\n", ping_ip);
     printf("\n%d packets sent, %d packets received, %f percent packet loss. Total time: %Lf ms.\n\n",
