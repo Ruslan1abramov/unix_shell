@@ -7,6 +7,7 @@ Hi! This is a simple implimention of a unix shell that was done gor my school pr
 ## Supported commands
 
 Here is a list of supported commands ordered by groups.
+
 **Group 1** - simple commands
 
 |Command        |Discription|Example|
