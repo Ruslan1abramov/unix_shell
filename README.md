@@ -48,3 +48,9 @@ Commands were written/found using the following guides:
  - http://www.embhack.com/implementation-of-cat-command/
  - http://wetechies.blogspot.com/2013/05/c-implementation-of-wcword-count-linux.html
  - http://linuxshellaccount.blogspot.com/2008/02/c-code-to-add-user-accounts-and.html
+
+### prerequisite
+
+This UNIX shell is using GNU readline library, make sure you have it installed.
+To install the readline library, open the terminal window and write
+`sudo apt-get install libreadline-dev`
