@@ -146,10 +146,13 @@ int myChmod(int argc, char **argv)
             return 1;
         }
     }
-
     str.insert(0, "0");
-    chmod(argv[2], stoi(str));
-    printf("Chmod successful\n");
+    int i = strtol(str.c_str(), nullptr, 8);
+    if(chmod(argv[2], i) == 0)
+        printf("Chmod successful to %i \n", i);
+    else
+        printf("Chmod failed\n");
+
     return 0;
 
 }
