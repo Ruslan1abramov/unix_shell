@@ -1,287 +1,230 @@
+
 //
 // Created by rusla on 10/1/2019.
 //
 // C program to Implement Ping
-//https://www.geeksforgeeks.org/ping-in-c/
-// compile as -o ping
-// run as sudo ./ping <hostname>
+// www.linuxforums.org/forum/networking/60389-implementing-ping-c.html
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/socket.h>
+#include <sys/file.h>
+#include <sys/time.h>
+
+#include <netinet/in_systm.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+//#include <netinet/ip_var.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <ctype.h>
+//#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <netinet/ip_icmp.h>
-#include <time.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <time.h>
+#include <stdint.h>
+#include <iostream>
 
-// Define the Packet Constants
-// ping packet size
-#define PING_PKT_S 64
+using namespace std;
 
-// Automatic port number
-#define PORT_NO 0
+uint16_t in_cksum(uint16_t *addr, unsigned len);
 
-// Automatic port number
-#define PING_SLEEP_RATE 1000000
+#define	DEFDATALEN	(64-ICMP_MINLEN)	/* default data length */
+#define	MAXIPLEN	60
+#define	MAXICMPLEN	76
+#define	MAXPACKET	(65536 - 60 - ICMP_MINLEN)/* max packet size */
 
-// Gives the timeout delay for receiving packets
-// in seconds
-#define RECV_TIMEOUT 1
-
-// Define the Ping Loop
-int pingloop=1;
-
-
-// ping packet structure
-struct ping_pkt
+int ping(string target)
 {
-    struct icmphdr hdr;
-    char msg[PING_PKT_S-sizeof(struct icmphdr)];
-};
 
-// Calculating the Check Sum
-unsigned short checksum(void *b, int len)
-{
-    unsigned short *buf = ((unsigned short*)(&b));//b;
-    unsigned int sum=0;
-    unsigned short result;
+    int s, i, cc, packlen, datalen = DEFDATALEN;
+    struct hostent *hp;
+    struct sockaddr_in to, from;
+    //struct protoent	*proto;
+    struct ip *ip;
+    u_char *packet, outpack[MAXPACKET];
+    char hnamebuf[MAXHOSTNAMELEN];
+    string hostname;
+    struct icmp *icp;
+    int ret, fromlen, hlen;
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+    struct timeval start, end;
+    int /*start_t, */end_t;
+    bool cont = true;
 
-    for ( sum = 0; len > 1; len -= 2 )
-        sum += *buf++;
-    if ( len == 1 )
-        sum += *(unsigned char*)buf;
-    sum = (sum >> 16) + (sum & 0xFFFF);
-    sum += (sum >> 16);
-    result = ~sum;
-    return result;
-}
+    to.sin_family = AF_INET;
 
-
-// Interrupt handler
-void intHandler(int dummy)
-{
-    pingloop=0;
-}
-
-// Performs a DNS lookup
-char *dns_lookup(char *addr_host, struct sockaddr_in *addr_con)
-{
-    printf("\nResolving DNS..\n");
-    struct hostent *host_entity;
-    char *ip=(char*)malloc(NI_MAXHOST*sizeof(char));
-    int i;
-
-    if ((host_entity = gethostbyname(addr_host)) == NULL)
-    {
-        // No ip found for hostname
-        return NULL;
-    }
-
-    //filling up address structure
-    strcpy(ip, inet_ntoa(*(struct in_addr *)
-            host_entity->h_addr));
-
-    (*addr_con).sin_family = host_entity->h_addrtype;
-    (*addr_con).sin_port = htons (PORT_NO);
-    (*addr_con).sin_addr.s_addr  = *(long*)host_entity->h_addr;
-
-    return ip;
-
-}
-
-// Resolves the reverse lookup of the hostname
-char* reverse_dns_lookup(char *ip_addr)
-{
-    struct sockaddr_in temp_addr;
-    socklen_t len;
-    char buf[NI_MAXHOST], *ret_buf;
-
-    temp_addr.sin_family = AF_INET;
-    temp_addr.sin_addr.s_addr = inet_addr(ip_addr);
-    len = sizeof(struct sockaddr_in);
-
-    if (getnameinfo((struct sockaddr *) &temp_addr, len, buf,
-                    sizeof(buf), NULL, 0, NI_NAMEREQD))
-    {
-        printf("Could not resolve reverse lookup of hostname\n");
-        return NULL;
-    }
-    ret_buf = (char*)malloc((strlen(buf) +1)*sizeof(char) );
-    strcpy(ret_buf, buf);
-    return ret_buf;
-}
-
-// make a ping request
-void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
-               char *ping_dom, char *ping_ip, char *rev_host)
-{
-    int ttl_val=64, msg_count=0, i, addr_len, flag=1,
-            msg_received_count=0;
-
-    struct ping_pkt pckt;
-    struct sockaddr_in r_addr;
-    struct timespec time_start, time_end, tfs, tfe;
-    long double rtt_msec=0, total_msec=0;
-    struct timeval tv_out;
-    tv_out.tv_sec = RECV_TIMEOUT;
-    tv_out.tv_usec = 0;
-
-    clock_gettime(CLOCK_MONOTONIC, &tfs);
-
-
-    // set socket options at ip to TTL and value to 64,
-    // change to what you want by setting ttl_val
-    if (setsockopt(ping_sockfd, SOL_IP, IP_TTL,
-                   &ttl_val, sizeof(ttl_val)) != 0)
-    {
-        printf("\nSetting socket options to TTL failed!\n");
-        return;
-    }
-
+    // try to convert as dotted decimal address, else if that fails assume it's a hostname
+    to.sin_addr.s_addr = inet_addr(target.c_str());
+    if (to.sin_addr.s_addr != (u_int)-1)
+        hostname = target;
     else
     {
-        printf("\nSocket set to TTL..\n");
+        hp = gethostbyname(target.c_str());
+        if (!hp)
+        {
+            cerr << "unknown host "<< target << endl;
+            return -1;
+        }
+        to.sin_family = hp->h_addrtype;
+        bcopy(hp->h_addr, (caddr_t)&to.sin_addr, hp->h_length);
+        strncpy(hnamebuf, hp->h_name, sizeof(hnamebuf) - 1);
+        hostname = hnamebuf;
+    }
+    packlen = datalen + MAXIPLEN + MAXICMPLEN;
+    if ( (packet = (u_char *)malloc((u_int)packlen)) == NULL)
+    {
+        cerr << "malloc error\n";
+        return -1;
     }
 
-    // setting timeout of recv setting
-    setsockopt(ping_sockfd, SOL_SOCKET, SO_RCVTIMEO,
-               (const char*)&tv_out, sizeof tv_out);
-
-    // send icmp packet in an infinite loop
-    while(pingloop)
+    /*
+        if ( (proto = getprotobyname("icmp")) == NULL)
+        {
+            cerr << "unknown protocol icmp" << endl;
+            return -1;
+        }
+    */
+    if ( (s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
     {
-        // flag is whether packet was sent or not
-        flag=1;
+        perror("socket");	/* probably not running as superuser */
+        return -1;
+    }
 
-        //filling packet
-        bzero(&pckt, sizeof(pckt));
-
-        pckt.hdr.type = ICMP_ECHO;
-        pckt.hdr.un.echo.id = getpid();
-
-        for ( i = 0; i < sizeof(pckt.msg)-1; i++ )
-            pckt.msg[i] = i+'0';
-
-        pckt.msg[i] = 0;
-        pckt.hdr.un.echo.sequence = msg_count++;
-        pckt.hdr.checksum = checksum(&pckt, sizeof(pckt));
+    icp = (struct icmp *)outpack;
+    icp->icmp_type = ICMP_ECHO;
+    icp->icmp_code = 0;
+    icp->icmp_cksum = 0;
+    icp->icmp_seq = 12345;	/* seq and id must be reflected */
+    icp->icmp_id = getpid();
 
 
-        usleep(PING_SLEEP_RATE);
+    cc = datalen + ICMP_MINLEN;
+    icp->icmp_cksum = in_cksum((unsigned short *)icp,cc);
 
-        //send packet
-        clock_gettime(CLOCK_MONOTONIC, &time_start);
-        if ( sendto(ping_sockfd, &pckt, sizeof(pckt), 0,
-                    (struct sockaddr*) ping_addr,
-                    sizeof(*ping_addr)) <= 0)
+    gettimeofday(&start, NULL);
+
+    i = sendto(s, (char *)outpack, cc, 0, (struct sockaddr*)&to, (socklen_t)sizeof(struct sockaddr_in));
+    if (i < 0 || i != cc)
+    {
+        if (i < 0)
+            perror("sendto error");
+        cout << "wrote " << hostname << " " <<  cc << " chars, ret= " << i << endl;
+    }
+
+    // Watch stdin (fd 0) to see when it has input.
+    FD_ZERO(&rfds);
+    FD_SET(s, &rfds);
+    // Wait up to one seconds.
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+
+    while(cont)
+    {
+        retval = select(s+1, &rfds, NULL, NULL, &tv);
+        if (retval == -1)
         {
-            printf("\nPacket Sending Failed!\n");
-            flag=0;
+            perror("select()");
+            return -1;
         }
-
-        //receive packet
-        addr_len=sizeof(r_addr);
-
-        if (recvfrom(ping_sockfd, &pckt, sizeof(pckt), 0,
-                     (struct sockaddr*)&r_addr, reinterpret_cast<socklen_t *>(&addr_len)) <= 0
-             && msg_count>1)
+        else if (retval)
         {
-            printf("\nPacket receive failed!\n");
-        }
+            fromlen = sizeof(sockaddr_in);
+            if ( (ret = recvfrom(s, (char *)packet, packlen, 0,(struct sockaddr *)&from, (socklen_t*)&fromlen)) < 0)
+            {
+                perror("recvfrom error");
+                return -1;
+            }
 
+            // Check the IP header
+            ip = (struct ip *)((char*)packet);
+            hlen = sizeof( struct ip );
+            if (ret < (hlen + ICMP_MINLEN))
+            {
+                cerr << "packet too short (" << ret  << " bytes) from " << hostname << endl;;
+                return -1;
+            }
+
+            // Now the ICMP part
+            icp = (struct icmp *)(packet + hlen);
+            if (icp->icmp_type == ICMP_ECHOREPLY)
+            {
+                cout << "Recv: echo reply"<< endl;
+                if (icp->icmp_seq != 12345)
+                {
+                    cout << "received sequence # " << icp->icmp_seq << endl;
+                    continue;
+                }
+                if (icp->icmp_id != getpid())
+                {
+                    cout << "received id " << icp->icmp_id << endl;
+                    continue;
+                }
+                cont = false;
+            }
+            else
+            {
+                cout << "Recv: not an echo reply" << endl;
+                continue;
+            }
+
+            gettimeofday(&end, NULL);
+            end_t = 1000000*(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec);
+
+            if(end_t < 1)
+                end_t = 1;
+
+            cout << "Elapsed time = " << end_t << " usec" << endl;
+            return end_t;
+        }
         else
         {
-            clock_gettime(CLOCK_MONOTONIC, &time_end);
-
-            double timeElapsed = ((double)(time_end.tv_nsec - time_start.tv_nsec))/1000000.0;
-            rtt_msec = (time_end.tv_sec-
-                        time_start.tv_sec) * 1000.0
-                       + timeElapsed;
-
-            // if packet was not sent, don't receive
-            if(flag)
-            {
-                if(!(pckt.hdr.type ==69 && pckt.hdr.code==0))
-                {
-                    printf("Error..Packet received with ICMP type %d code %d\n",
-                    pckt.hdr.type, pckt.hdr.code);
-                }
-                else
-                {
-                    printf("%d bytes from %s (h: %s) (%s) msg_seq=%d ttl=%d rtt = %Lf ms.\n",
-                    PING_PKT_S, ping_dom, rev_host,
-                            ping_ip, msg_count,
-                            ttl_val, rtt_msec);
-
-                    msg_received_count++;
-                }
-            }
+            cout << "No data within one seconds.\n";
+            return 0;
         }
     }
-    clock_gettime(CLOCK_MONOTONIC, &tfe);
-    double timeElapsed = ((double)(tfe.tv_nsec -
-                                   tfs.tv_nsec))/1000000.0;
-
-    total_msec = (tfe.tv_sec-tfs.tv_sec)*1000.0+
-                 timeElapsed;
-
-    printf("\n===%s ping statistics===\n", ping_ip);
-    printf("\n%d packets sent, %d packets received, %f percent packet loss. Total time: %Lf ms.\n\n",
-    msg_count, msg_received_count,
-            ((msg_count - msg_received_count)/msg_count) * 100.0,
-            total_msec);
-}
-
-// Driver Code
-int ping(int argc, char *argv[])
-{
-    int sockfd;
-    char *ip_addr, *reverse_hostname;
-    struct sockaddr_in addr_con;
-    int addrlen = sizeof(addr_con);
-    char net_buf[NI_MAXHOST];
-
-    if(argc!=2)
-    {
-        printf("\nFormat %s <address>\n", argv[0]);
-        return 0;
-    }
-
-    ip_addr = dns_lookup(argv[1], &addr_con);
-    if(ip_addr==NULL)
-    {
-        printf("\nDNS lookup failed! Could not resolve hostname!\n");
-        return 0;
-    }
-
-    reverse_hostname = reverse_dns_lookup(ip_addr);
-    printf("\nTrying to connect to '%s' IP: %s\n",
-           argv[1], ip_addr);
-    printf("\nReverse Lookup domain: %s",
-           reverse_hostname);
-
-    //socket()
-    sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    if(sockfd<0)
-    {
-        printf("\nSocket file descriptor not received!!\n");
-        return 0;
-    }
-    else
-        printf("\nSocket file descriptor %d received\n", sockfd);
-
-    signal(SIGINT, intHandler);//catching interrupt
-
-    //send pings continuously
-    send_ping(sockfd, &addr_con, reverse_hostname,
-              ip_addr, argv[1]);
-
     return 0;
 }
+
+uint16_t in_cksum(uint16_t *addr, unsigned len)
+{
+    uint16_t answer = 0;
+    /*
+     * Our algorithm is simple, using a 32 bit accumulator (sum), we add
+     * sequential 16 bit words to it, and at the end, fold back all the
+     * carry bits from the top 16 bits into the lower 16 bits.
+     */
+    uint32_t sum = 0;
+    while (len > 1)  {
+        sum += *addr++;
+        len -= 2;
+    }
+
+    // mop up an odd byte, if necessary
+    if (len == 1) {
+        *(unsigned char *)&answer = *(unsigned char *)addr ;
+        sum += answer;
+    }
+
+    // add back carry outs from top 16 bits to low 16 bits
+    sum = (sum >> 16) + (sum & 0xffff); // add high 16 to low 16
+    sum += (sum >> 16); // add carry
+    answer = ~sum; // truncate to 16 bits
+    return answer;
+}
+
+int myPing(int argc, char** argv)
+{
+    if (argc != 2)
+    {
+        cout << "Usage: ping hostname" << endl;
+        exit(1);
+    }
+    cout << "ping returned " << ping(argv[1]) << endl;
+    return 0;
+}
+

@@ -6,4 +6,4 @@
 #define UNIX_SHELL_PING_H
 
 #endif //UNIX_SHELL_PING_H
-int ping(int argc, char *argv[]);
+int myPing(int argc, char *argv[]);

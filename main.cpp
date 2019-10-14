@@ -161,7 +161,7 @@ int ownCmdHandler(char** parsed, int numOfArgs)
             ifconfig(numOfArgs ,parsed);
             return 1;
         case 14:
-            ping(numOfArgs ,parsed);
+            myPing(numOfArgs ,parsed);
             return 1;
         case 15:
             myKill(numOfArgs ,parsed);
