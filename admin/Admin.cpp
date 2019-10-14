@@ -182,7 +182,6 @@ void do_chown(const char *file_path,
     if (chown(file_path, uid, gid) == -1) {
         printf("chown fail");
         return;
-
     }
 }
 
