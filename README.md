@@ -1,7 +1,6 @@
 # Welcome to my Unix shell!
 
-Hi! This is a simple implimention of a unix shell that was done gor my school project.
-
+Hi! This is a simple implementation of a UNIX shell that was done for my school project.
 
 
 ## Supported commands
