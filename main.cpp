@@ -67,15 +67,23 @@ void printDir()
 void openHelp()
 {
     puts("\n***WELCOME TO MY SHELL HELP***"
-         "\nCopyright @ Suprotik Dey"
          "\n-Use the shell at your own risk..."
          "\nList of Commands supported:"
          "\n>cd"
          "\n>ls"
+         "\n>mkdir"
+         "\n>wc"
+         "\n>cat"
+         "\n>tail"
+         "\n>mv"
+         "\n>chmod"
+         "\n>chown"
+         "\n>adduser"
+         "\n>ifconfig"
+         "\n>kill"
+         "\n>ping"
          "\n>exit"
-         "\n>all other general commands available in UNIX shell"
-         "\n>pipe handling"
-         "\n>improper space handling");
+         );
 
     return;
 }
@@ -85,12 +93,12 @@ int ownCmdHandler(char** parsed, int numOfArgs)
 {
     int NoOfOwnCmds = 15, i, switchOwnArg = 0;
     char* ListOfOwnCmds[NoOfOwnCmds];
-    char* username;
 
     ListOfOwnCmds[0] = "exit";
+    //simple
     ListOfOwnCmds[1] = "cd";
     ListOfOwnCmds[2] = "help";
-    //simple
+    ListOfOwnCmds[2] = "mkdir";
     ListOfOwnCmds[4] = "wc";
     ListOfOwnCmds[5] = "cat";
     ListOfOwnCmds[6] = "ls";
@@ -123,11 +131,7 @@ int ownCmdHandler(char** parsed, int numOfArgs)
             openHelp();
             return 1;
         case 4:
-            username = getenv("USER");
-            printf("\nHello %s.\nMind that this is "
-                   "not a place to play around."
-                   "\nUse help to know more..\n",
-                   username);
+            myMkdir(numOfArgs ,parsed);
             return 1;
         case 5:
             wc(numOfArgs ,parsed);
@@ -163,9 +167,8 @@ int ownCmdHandler(char** parsed, int numOfArgs)
             myKill(numOfArgs ,parsed);
             return 1;
 
-
-
         default:
+            printf("\nUnsupported Command\n");
             break;
     }
 

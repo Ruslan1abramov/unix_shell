@@ -12,6 +12,6 @@ int ls();
 int mv(int ac, char* av[]);
 int tail(int ac, char* av[]);
 int wc(int argc , char *argv[]);
-
+void myMkdir(int argc , char *argv[]);
 
 

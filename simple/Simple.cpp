@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <utmp.h>
+#include <sys/stat.h>
 
 #define FALSE 0
 #define TRUE !FALSE
@@ -299,4 +300,15 @@ int wc(int argc , char *argv[])
     printf("line_count = %d\n",line_count);
 
 
+}
+
+void myMkdir(int argc , char *argv[])
+{
+    if(argc < 2)
+    {
+        printf("Please specify the Directory name as argument\n");
+        return;
+    }
+    for(int i = 1 ; i < argc ; i++)
+        mkdir(argv[1], 0755);
 }
