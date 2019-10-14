@@ -94,6 +94,7 @@ int ownCmdHandler(char** parsed, int numOfArgs)
     int NoOfOwnCmds = 15, i, switchOwnArg = 0;
     char* ListOfOwnCmds[NoOfOwnCmds];
 
+
     ListOfOwnCmds[0] = "exit";
     //simple
     ListOfOwnCmds[1] = "cd";
