@@ -149,7 +149,7 @@ int myChmod(int argc, char **argv)
     str.insert(0, "0");
     int i = strtol(str.c_str(), nullptr, 8);
     if(chmod(argv[2], i) == 0)
-        printf("Chmod successful to %i \n", i);
+        printf("Chmod successful to %s \n", str.c_str());
     else
         printf("Chmod failed\n");
 
@@ -186,10 +186,17 @@ void do_chown(const char *file_path,
         printf("chown fail");
         return;
     }
+
+    printf("file %s changed owner to %s under group %s", file_path, user_name, group_name);
 }
 
 
 void myChown(int argc, char **argv)
 {
-    do_chown(argv[0], argv[1], argv[2]);
+    if(argc !=4 )
+    {
+        printf("wrong format:\n chown [filepath] [user] [group]");
+        return;
+    }
+    do_chown(argv[1], argv[2], argv[3]);
 }
