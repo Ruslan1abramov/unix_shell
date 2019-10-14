@@ -40,12 +40,12 @@ int adduser(int argc, char **argv)
 
     if (argc != 4) {
         printf("Usage: %s [dirname - no slashes ] [ logname ] [ comment - in quotes ]\n", argv[0]);
-        exit(1);
+        return 1;
     }
 
     if (strlen(argv[2]) > 8 || strlen(argv[2]) < 5) {
         printf("Please choose a logname between 5 and 8 characters!\n");
-        exit(1);
+        return 1;
     }
 
     signal(SIGHUP, SIG_IGN);
@@ -89,7 +89,7 @@ int adduser(int argc, char **argv)
     if ( reply != 'y') {
         printf("\n");
         printf("All right, give it another shot if you want!\n");
-        exit(0);
+        return 1;
     }
 
     tmp = fopen("/etc/passwd", "a");
@@ -122,6 +122,7 @@ int adduser(int argc, char **argv)
     execl("/usr/bin/passwd", "passwd", username, NULL);
     printf("\n");
     printf("Password set\n");
+    return 0;
 
 }
 
@@ -149,7 +150,7 @@ int myChmod(int argc, char **argv)
     str.insert(0, "0");
     chmod(argv[2], stoi(str));
     printf("Chmod successful\n");
-
+    return 0;
 
 }
 
