@@ -98,7 +98,7 @@ int ownCmdHandler(char** parsed, int numOfArgs)
     //simple
     ListOfOwnCmds[1] = "cd";
     ListOfOwnCmds[2] = "help";
-    ListOfOwnCmds[2] = "mkdir";
+    ListOfOwnCmds[3] = "mkdir";
     ListOfOwnCmds[4] = "wc";
     ListOfOwnCmds[5] = "cat";
     ListOfOwnCmds[6] = "ls";
